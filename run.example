@@ -16,6 +16,7 @@ echo "Pre-process KsponSpeech Dataset.."
 python main.py \
     --dataset_path $DATASET_PATH \
     --vocab_dest $VOCAB_DEST \
+    --save_path $SAVE_PATH \
     --output_unit $OUTPUT_UNIT \
     --preprocess_mode $PREPROCESS_MODE \
     --vocab_size $VOCAB_SIZE
