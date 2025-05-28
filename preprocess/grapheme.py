@@ -7,10 +7,10 @@ def load_label(filepath):
     grpm2id = dict()
     id2grpm = dict()
 
-    vocab_data_frame = pd.read_csv(filepath, encoding='utf-8')
+    vocab_data_frame = pd.read_csv(filepath, encoding="utf-8")
 
-    id_list = vocab_data_frame['id']
-    grpm_list = vocab_data_frame['grpm']
+    id_list = vocab_data_frame["id"]
+    grpm_list = vocab_data_frame["grpm"]
 
     for id, grpm in zip(id_list, grpm_list):
         grpm2id[grpm] = id
@@ -22,34 +22,34 @@ def sentence_to_target(transcript, grpm2id):
     target = str()
 
     for grpm in transcript:
-        target += (str(grpm2id[grpm]) + ' ')
+        target += (str(grpm2id[grpm]) + " ")
 
     return target[:-1]
 
 
-def sentence_to_grapheme(audio_paths, transcripts, vocab_dest: str = './data'):
+def sentence_to_grapheme(audio_paths, transcripts, vocab_dest: str = "./data"):
     grapheme_transcripts = list()
 
     if not os.path.exists(vocab_dest):
         os.mkdir(vocab_dest)
 
     for transcript in transcripts:
-        grapheme_transcripts.append(' '.join(unicodedata.normalize('NFKD', transcript).replace(' ', '|')).upper())
+        grapheme_transcripts.append(" ".join(unicodedata.normalize("NFKD", transcript).replace(" ", "|")).upper())
 
-    print('generate grapheme labels...')
+    print("generate grapheme labels...")
     generate_grapheme_labels(grapheme_transcripts, vocab_dest)
 
-    print('create_script started..')
-    grpm2id, id2grpm = load_label(os.path.join(vocab_dest, 'aihub_labels.csv'))
+    print("create_script started..")
+    grpm2id, id2grpm = load_label(os.path.join(vocab_dest, "aihub_labels.csv"))
 
-    with open(os.path.join(f'{vocab_dest}/transcripts.txt'), 'w') as f:
+    with open(os.path.join(f"{vocab_dest}/transcripts.txt"), "w") as f:
         for audio_path, transcript, grapheme_transcript in zip(audio_paths, transcripts, grapheme_transcripts):
-            audio_path = audio_path.replace('txt', 'pcm')
+            audio_path = audio_path.replace("txt", "pcm")
             grpm_id_transcript = sentence_to_target(grapheme_transcript.split(), grpm2id)
-            f.write(f'{audio_path}\t{transcript}\t{grpm_id_transcript}\n')
+            f.write(f"{audio_path}\t{transcript}\t{grpm_id_transcript}\n")
 
 
-def generate_grapheme_labels(grapheme_transcripts, vocab_dest: str = './data'):
+def generate_grapheme_labels(grapheme_transcripts, vocab_dest: str = "./data"):
     vocab_list = list()
     vocab_freq = list()
 
@@ -64,16 +64,15 @@ def generate_grapheme_labels(grapheme_transcripts, vocab_dest: str = './data'):
 
     vocab_freq, vocab_list = zip(*sorted(zip(vocab_freq, vocab_list), reverse=True))
     vocab_dict = {
-        'id': [0, 1, 2],
-        'grpm': ['<pad>', '<sos>', '<eos>'],
-        'freq': [0, 0, 0]
+        "id": [0, 1, 2],
+        "grpm": ["<pad>", "<sos>", "<eos>"],
+        "freq": [0, 0, 0]
     }
 
     for idx, (grpm, freq) in enumerate(zip(vocab_list, vocab_freq)):
-        vocab_dict['id'].append(idx + 3)
-        vocab_dict['grpm'].append(grpm)
-        vocab_dict['freq'].append(freq)
+        vocab_dict["id"].append(idx + 3)
+        vocab_dict["grpm"].append(grpm)
+        vocab_dict["freq"].append(freq)
 
     label_df = pd.DataFrame(vocab_dict)
-    label_df.to_csv(os.path.join(vocab_dest, 'aihub_labels.csv'), encoding='utf-8', index=False)
-
+    label_df.to_csv(os.path.join(vocab_dest, "aihub_labels.csv"), encoding="utf-8", index=False)
